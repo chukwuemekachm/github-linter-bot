@@ -67,7 +67,9 @@ async function requestChangesReview(
         position: message.column,
         body: `<${String(message.ruleId).toUpperCase()}> - ${message.message}`,
       }));
-      acc.push(...messages);
+      messages.forEach((m) => {
+        acc.push(m);
+      });
       return acc;
     }
     return acc;
