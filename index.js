@@ -58,10 +58,12 @@ async function lintFiles(app) {
   const resultText = formatter.format(results);
 
   // 4. Output it.
-  app.log.info('Linting result: ', resultText);
+  app.log.info('Linting result: ');
+  app.log.info(resultText);
   } catch (error) {
     process.exitCode = 1;
-    app.log.error('Linting errors: ', error);
+    app.log.error('Linting errors: ');
+    app.log.error(error);
   }
 }
 
@@ -82,7 +84,8 @@ const bot = (app) => {
         repository.name,
         pull_request.number,
       );
-      app.log.info('pull request files: ', files.length);
+      app.log.info('pull request files: ');
+      app.log.info(files.length);
 
       app.log.info('Executing lint files');
       lintFiles(app);
