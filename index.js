@@ -86,6 +86,4 @@ const bot = (app) => {
   );
 };
 
-module.exports = bot;
-
 run(bot);
