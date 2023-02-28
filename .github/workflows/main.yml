@@ -18,6 +18,6 @@ jobs:
           
       - name: Lint action step
         id: lint
-        uses: chukwuemekachm/github-linter-bot@v1.9
+        uses: chukwuemekachm/github-linter-bot@v2.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

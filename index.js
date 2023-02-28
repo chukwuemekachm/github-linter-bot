@@ -48,18 +48,14 @@ async function fetchAllPullRequestFiles(context, owner, repo, pull_number) {
 async function lintFiles(app) {
   try {
     // 1. Create an instance.
-  const eslint = new ESLint();
+    const eslint = new ESLint();
 
-  // 2. Lint files.
-  const results = await eslint.lintFiles(['./**/*.js']);
+    // 2. Lint files.
+    const results = await eslint.lintFiles(['./**/*.js']);
 
-  // 3. Format the results.
-  const formatter = await eslint.loadFormatter('stylish');
-  const resultText = formatter.format(results);
-
-  // 4. Output it.
-  app.log.info('Linting result: ');
-  app.log.info(resultText);
+    // 3. Output it.
+    app.log.info('Linting result: ');
+    app.log.info(results);
   } catch (error) {
     process.exitCode = 1;
     app.log.error('Linting errors: ');
