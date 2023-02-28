@@ -15,8 +15,6 @@ module.exports = (app) => {
         repository.name,
         pull_request.number
       );
-
-      console.log("response ----------------", files);
     }
   );
 };
