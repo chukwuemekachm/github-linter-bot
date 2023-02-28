@@ -1,0 +1,8 @@
+name: GitHub Linter
+description: "GitHub Bot Linter Action"
+branding:
+  icon: "gift"
+  color: orange
+runs:
+  using: "node16"
+  main: "dist/index.js"
