@@ -45,17 +45,81 @@ async function fetchAllPullRequestFiles(context, owner, repo, pull_number) {
   return pullRequestFiles;
 }
 
-async function lintFiles(app) {
+async function requestChangesReview(
+  context,
+  owner,
+  repo,
+  pull_number,
+  results,
+) {
+  const body = 'This is close to perfect! Please address the suggested inline change.';
+
+  const files = results.map((result) => ({
+    path: result.filePath,
+    messages: result.messages,
+    errorCount: result.errorCount,
+  }));
+  const comments = files.reduce((acc, curr) => {
+    if (curr.errorCount) {
+      const messages = curr.messages.map((message) => ({
+        path: curr.path,
+        line: message.line,
+        position: message.column,
+        body: `<${String(message.ruleId).toUpperCase()}> - ${message.message}`,
+      }));
+      acc.push(...messages);
+      return acc;
+    }
+    return acc;
+  }, []);
+  await context.octokit.rest.pulls.createReview({
+    owner,
+    repo,
+    pull_number,
+    event: 'REQUEST_CHANGES',
+    body,
+    comments,
+  });
+}
+
+async function approveChangesReview(context, owner, repo, pull_number) {
+  await context.octokit.rest.pulls.createReview({
+    owner,
+    repo,
+    pull_number,
+    event: 'APPROVE',
+  });
+
+  return true;
+}
+
+async function lintFiles(app, context) {
   try {
     // 1. Create an instance.
     const eslint = new ESLint();
+    const { repository, pull_request } = context.payload;
 
     // 2. Lint files.
     const results = await eslint.lintFiles(['./**/*.js']);
 
     // 3. Output it.
     app.log.info('Linting result: ');
-    app.log.info(results);
+    if (results.length) {
+      requestChangesReview(
+        context,
+        repository.owner.login,
+        repository.name,
+        pull_request.number,
+        results,
+      );
+    } else {
+      approveChangesReview(
+        context,
+        repository.owner.login,
+        repository.name,
+        pull_request.number,
+      );
+    }
   } catch (error) {
     process.exitCode = 1;
     app.log.error('Linting errors: ');
@@ -84,7 +148,7 @@ const bot = (app) => {
       app.log.info(files.length);
 
       app.log.info('Executing lint files');
-      lintFiles(app);
+      lintFiles(app, context);
     },
   );
 };
