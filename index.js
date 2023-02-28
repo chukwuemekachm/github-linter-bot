@@ -1,4 +1,5 @@
 import { ESLint } from 'eslint';
+import { run } from '@probot/adapter-github-actions';
 
 async function fetchPullRequestFiles(
   context,
@@ -48,7 +49,7 @@ async function fetchAllPullRequestFiles(context, owner, repo, pull_number) {
  * This is the main entrypoint to your Probot app
  * @param {import('probot').Probot} app
  */
-module.exports = (app) => {
+const bot = (app) => {
   // Your code here
   app.log.info('Yay, the app was loaded!');
   app.on(
@@ -84,3 +85,7 @@ module.exports = (app) => {
     },
   );
 };
+
+module.exports = bot;
+
+run(bot);
