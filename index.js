@@ -45,6 +45,26 @@ async function fetchAllPullRequestFiles(context, owner, repo, pull_number) {
   return pullRequestFiles;
 }
 
+async function lintFiles(app) {
+  try {
+    // 1. Create an instance.
+  const eslint = new ESLint();
+
+  // 2. Lint files.
+  const results = await eslint.lintFiles(['./**/*.js']);
+
+  // 3. Format the results.
+  const formatter = await eslint.loadFormatter('stylish');
+  const resultText = formatter.format(results);
+
+  // 4. Output it.
+  app.log.info('Linting result: ', resultText);
+  } catch (error) {
+    process.exitCode = 1;
+    app.log.error('Linting errors: ', error);
+  }
+}
+
 /**
  * This is the main entrypoint to your Probot app
  * @param {import('probot').Probot} app
@@ -62,26 +82,10 @@ const bot = (app) => {
         repository.name,
         pull_request.number,
       );
-      app.log.info('pull request files: ', files);
-      app.log.info(files);
+      app.log.info('pull request files: ', files.length);
 
-      (async function main() {
-        // 1. Create an instance.
-        const eslint = new ESLint();
-
-        // 2. Lint files.
-        const results = await eslint.lintFiles(['lib/**/*.js']);
-
-        // 3. Format the results.
-        const formatter = await eslint.loadFormatter('stylish');
-        const resultText = formatter.format(results);
-
-        // 4. Output it.
-        console.log('Linting result: ', resultText);
-      }()).catch((error) => {
-        process.exitCode = 1;
-        console.error('Linting errors: ', error);
-      });
+      app.log.info('Executing lint files');
+      lintFiles(app);
     },
   );
 };
