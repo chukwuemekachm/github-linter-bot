@@ -6,6 +6,11 @@ jobs:
     runs-on: ubuntu-latest
     name: A job to lint your JS projects
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          
       - name: Lint action step
         id: lint
         uses: chukwuemekachm/github-linter-bot@v1.1
