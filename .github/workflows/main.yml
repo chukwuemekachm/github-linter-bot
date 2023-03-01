@@ -5,6 +5,9 @@ jobs:
   lint_project:
     runs-on: ubuntu-latest
     name: A job to lint your JS projects
+    permissions:
+      contents: read
+      pull-requests: write
 
     steps:
       - name: Checkout Code
@@ -20,8 +23,5 @@ jobs:
       - name: Lint action step
         id: lint
         uses: chukwuemekachm/github-linter-bot@v2.3
-        permissions:
-          contents: read
-          pull-requests: write
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
