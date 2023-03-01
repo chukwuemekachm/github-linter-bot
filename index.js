@@ -146,6 +146,12 @@ const bot = (app) => {
         repository.name,
         pull_request.number,
       );
+      app.log.info('Github username');
+      app.log.info(repository.owner.login);
+      app.log.info('Github repository');
+      app.log.info(repository.name);
+      app.log.info('Github pull request number');
+      app.log.info(pull_request.number);
       app.log.info('pull request files: ');
       app.log.info(files.length);
 
