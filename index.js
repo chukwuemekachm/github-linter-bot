@@ -74,13 +74,13 @@ async function requestChangesReview(
     }
     return acc;
   }, []);
-  await context.octokit.rest.pulls.createReview({
+  const review = await context.octokit.rest.pulls.createReview({
     owner,
     repo,
     pull_number,
     event: 'REQUEST_CHANGES',
     body,
-    // comments,
+    comments: comments.slice(0, 20),
   });
 }
 
