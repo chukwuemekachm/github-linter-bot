@@ -80,7 +80,7 @@ async function requestChangesReview(
     pull_number,
     event: 'REQUEST_CHANGES',
     body,
-    comments,
+    // comments,
   });
 }
 
