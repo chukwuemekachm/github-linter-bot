@@ -45,6 +45,10 @@ async function fetchAllPullRequestFiles(context, owner, repo, pull_number) {
   return pullRequestFiles;
 }
 
+function transformFilePath(path, repo) {
+  return String(path).replace(`home/runner/work/${repo}/${repo}/`, '');
+}
+
 async function requestChangesReview(
   context,
   owner,
@@ -62,7 +66,7 @@ async function requestChangesReview(
   const comments = files.reduce((acc, curr) => {
     if (curr.errorCount) {
       const messages = curr.messages.map((message) => ({
-        path: curr.path,
+        path: transformFilePath(curr.path),
         line: message.line,
         // position: message.column,
         body: `<${String(message.ruleId).toUpperCase()}> - ${message.message}`,
