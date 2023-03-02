@@ -2,6 +2,35 @@ function transformFilePath(path, repo) {
   return String(path).replace(`/home/runner/work/${repo}/${repo}/`, '');
 }
 
+export async function requestChangesReviewBatch(
+  context,
+  owner,
+  repo,
+  pullNumber,
+  comments,
+) {
+  if (comments.length > 20) {
+    await context.octokit.rest.pulls.createReview({
+      owner,
+      repo,
+      pull_number: pullNumber,
+      event: 'COMMENT',
+      body: '',
+      comments: comments.slice(0, 20),
+    });
+    return requestChangesReviewBatch(context, owner, repo, pullNumber, comments.slice(20));
+  }
+  await context.octokit.rest.pulls.createReview({
+    owner,
+    repo,
+    pull_number: pullNumber,
+    event: 'COMMENT',
+    body: '',
+    comments,
+  });
+  return 'done';
+}
+
 export async function requestChangesReview(
   context,
   owner,
@@ -9,8 +38,6 @@ export async function requestChangesReview(
   pullNumber,
   results,
 ) {
-  const body = 'This is close to perfect! Please address the suggested inline change.';
-
   const files = results.map((result) => ({
     path: result.filePath,
     messages: result.messages,
@@ -33,14 +60,8 @@ export async function requestChangesReview(
     }
     return acc;
   }, []);
-  await context.octokit.rest.pulls.createReview({
-    owner,
-    repo,
-    pull_number: pullNumber,
-    event: 'REQUEST_CHANGES',
-    body,
-    comments,
-  });
+  await requestChangesReviewBatch(context, owner, repo, pullNumber, comments);
+  return 'done';
 }
 
 export async function approveChangesReview(context, owner, repo, pullNumber) {
@@ -51,5 +72,5 @@ export async function approveChangesReview(context, owner, repo, pullNumber) {
     event: 'APPROVE',
   });
 
-  return true;
+  return 'done';
 }

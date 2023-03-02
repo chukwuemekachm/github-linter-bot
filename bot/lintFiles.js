@@ -11,20 +11,22 @@ export async function lintFiles(app, context) {
     const results = await eslint.lintFiles(['./**/*.js']);
 
     if (results.length) {
-      requestChangesReview(
+      await requestChangesReview(
         context,
         repository.owner.login,
         repository.name,
         pullNumber.number,
         results,
       );
+      process.exitCode = 1;
     } else {
-      approveChangesReview(
+      await approveChangesReview(
         context,
         repository.owner.login,
         repository.name,
         pullNumber.number,
       );
+      process.exitCode = 0;
     }
   } catch (error) {
     process.exitCode = 1;
