@@ -64,7 +64,7 @@ async function requestChangesReview(
       const messages = curr.messages.map((message) => ({
         path: curr.path,
         line: message.line,
-        position: message.column,
+        // position: message.column,
         body: `<${String(message.ruleId).toUpperCase()}> - ${message.message}`,
       }));
       messages.forEach((m) => {
