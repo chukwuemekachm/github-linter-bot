@@ -66,7 +66,7 @@ async function requestChangesReview(
   const comments = files.reduce((acc, curr) => {
     if (curr.errorCount) {
       const messages = curr.messages.map((message) => ({
-        path: transformFilePath(curr.path),
+        path: transformFilePath(curr.path, repo),
         line: message.line,
         // position: message.column,
         body: `<${String(message.ruleId).toUpperCase()}> - ${message.message}`,
