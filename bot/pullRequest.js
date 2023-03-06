@@ -1,5 +1,46 @@
-function transformFilePath(path, repo) {
-  return String(path).replace(`/home/runner/work/${repo}/${repo}/`, '');
+import { transformFilePath } from './constants';
+
+async function fetchPullRequestFiles(
+  context,
+  owner,
+  repo,
+  pullNumber,
+  page,
+  perPage,
+) {
+  const { data } = await context.octokit.rest.pulls.listFiles({
+    owner,
+    repo,
+    pull_number: pullNumber,
+    per_page: perPage,
+    page,
+  });
+
+  return data;
+}
+
+export async function fetchAllPullRequestFiles(context, owner, repo, pullNumber) {
+  const PER_PAGE = 1;
+  let pageNumber = 1;
+  let lastPageCount = 0;
+  const pullRequestFiles = [];
+
+  do {
+    const files = await fetchPullRequestFiles(
+      context,
+      owner,
+      repo,
+      pullNumber,
+      pageNumber,
+      PER_PAGE,
+    );
+
+    lastPageCount = files.length;
+    pullRequestFiles.push(...files);
+    pageNumber++;
+  } while (lastPageCount === PER_PAGE);
+
+  return pullRequestFiles;
 }
 
 export async function requestChangesReviewBatch(

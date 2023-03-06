@@ -1,22 +1,43 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { ESLint } from 'eslint';
-import { approveChangesReview, requestChangesReview } from './pullRequest';
+import {
+  approveChangesReview,
+  fetchAllPullRequestFiles,
+  requestChangesReview,
+} from './pullRequest';
 
 // eslint-disable-next-line import/prefer-default-export
 export async function lintFiles(app, context) {
   try {
     const eslint = new ESLint();
-    const { repository, pull_request: pullNumber } = context.payload;
+    const { repository, pull_request: pullRequest } = context.payload;
 
+    const pullRequestFiles = await fetchAllPullRequestFiles(
+      context,
+      repository.owner.login,
+      repository.name,
+      pullRequest.number,
+    );
     const results = await eslint.lintFiles(['./**/*.js']);
+
+    const lintResultMap = new Map();
+    results.forEach((r) => lintResultMap.set(r.filePath, r));
+
+    const lintResults = [];
+    pullRequestFiles.forEach((file) => {
+      const fileLintErrors = lintResultMap.get(file.filename);
+      if (fileLintErrors && fileLintErrors.filePath) {
+        lintResults.push(fileLintErrors);
+      }
+    });
 
     if (results.length) {
       await requestChangesReview(
         context,
         repository.owner.login,
         repository.name,
-        pullNumber.number,
-        results,
+        pullRequest.number,
+        lintResults,
       );
       process.exitCode = 1;
     } else {
@@ -24,7 +45,7 @@ export async function lintFiles(app, context) {
         context,
         repository.owner.login,
         repository.name,
-        pullNumber.number,
+        pullRequest.number,
       );
       process.exitCode = 0;
     }
